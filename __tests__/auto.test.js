@@ -26,7 +26,7 @@ describe('Test Users controller', () => {
         expect(response.body).toHaveProperty("user_password");
         expect(response.body).toHaveProperty("user_type");
 
-        const deletedTest = await request(global.url).post("user/del");
+        const deletedTest = await request("https://9a2d-65-181-53-74.ngrok-free.app/").post("user/del");
         console.log(deletedTest.body);
         expect(deletedTest.statusCode).toBe(200);
     });
