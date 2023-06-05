@@ -3,7 +3,7 @@ const authController = require("../controllers/authController");
 
 describe('Test Users controller', () => {
     test('fetch all users ', async () => {
-        const response = await request(global.url).get("user/");
+        const response = await request("http://localhost:5050/").get("user/");
         expect(response.statusCode).toBe(200);
     });
 
@@ -16,7 +16,7 @@ describe('Test Users controller', () => {
             user_type: "CUSTOMER"
         }
 
-        const response = await request(global.url).post("user/post").send(newUser);
+        const response = await request("http://localhost:5050/").post("user/post").send(newUser);
         console.log(response.body)
         expect(response.statusCode).toBe(201);
         expect(response.body).toHaveProperty("id");
