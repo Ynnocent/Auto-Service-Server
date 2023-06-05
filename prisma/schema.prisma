@@ -1,0 +1,146 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DEV_DATABASE_URL")
+}
+
+enum UserType {
+  EMPLOYEE
+  CUSTOMER
+}
+
+enum EmployeeType {
+  STORE_ADMIN
+  WAREHOUSE_MANAGER
+  SALES
+  MARKETING
+  MECHANIC
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ServiceType {
+  OIL_CHANGE
+  TIRE_REPAIR
+  ITEM_PURCHASE
+  WINDSHIELD_REPAIR
+  INSPECTION
+  AIR_FILTER_REPLACE
+  BRAKE_WORK
+  ENGINE_TUNE_UP
+  BATTERY_REPLACEMENT
+  SCHEDULED_MAINTENANCE
+  WIPER_BLADES_REPLACEMENT
+}
+
+enum CarType {
+  SEDAN
+  SUV
+  TRUCK
+  MINIVAN
+  COUPE
+  SPORTS
+  STATION_WAGON
+  HATCHBACK
+  CONVERTABLE
+  CROSSOVER
+  VAN
+  MUV
+}
+
+model User {
+  id            String     @id @default(uuid())
+  user_fname    String
+  user_lname    String
+  user_password String
+  user_email    String     @unique
+  user_type     UserType @default(CUSTOMER)
+  date_created  DateTime   @default(now())
+  employee      Employee[]
+  customer      Customer[]
+
+  @@unique([id, user_type])
+}
+
+model Employee {
+  id            Int             @id @default(autoincrement())
+  user          User            @relation(fields: [user_type, user_id], references: [user_type, id])
+  user_type     UserType
+  user_id       String
+  employee_type EmployeeType[]  @unique
+  hire_date     DateTime        @default(now())
+  salary        Decimal         @default(0.0)
+  store         Store           @relation(fields: [store_id], references: [id])
+  store_id      Int
+  orders        OrderEmployee[]
+  order         Order[]
+
+  @@unique([user_id, user_type])
+}
+
+model Store {
+  id            Int        @id @default(autoincrement())
+  store_name    String     @unique
+  store_address String
+  store_phone   String
+  store_email   String
+  employees     Employee[]
+}
+
+model OrderEmployee {
+  id          Int      @id @default(autoincrement())
+  order       Order    @relation(fields: [order_id], references: [id])
+  order_id    Int
+  employee    Employee @relation(fields: [employee_id], references: [id])
+  employee_id Int
+}
+
+model Order {
+  id             Int             @id @default(autoincrement())
+  order_id       Int
+  order_date     DateTime        @default(now())
+  order_status   OrderStatus
+  service_type   ServiceType[]   @unique
+  total_amount   Decimal
+  empolyees      Employee        @relation(fields: [employee_id], references: [id])
+  employee_id    Int
+  order_employee OrderEmployee[]
+  car            Car             @relation(fields: [car_id], references: [id])
+  car_id         Int
+  customer       Customer        @relation(fields: [customer_id], references: [id])
+  customer_id    Int
+}
+
+model Customer {
+  id        Int        @id @default(autoincrement())
+  user      User       @relation(fields: [user_id], references: [id])
+  user_id   String
+  user_type UserType
+  car       Car[]
+  orders    Order[]
+}
+
+model Car {
+  id              Int      @id @default(autoincrement())
+  car_name        String   @unique
+  car_type        CarType
+  car_color       String
+  car_model       String
+  car_year        Int
+  car_price       Decimal
+  car_damage_desc String
+  customer        Customer @relation(fields: [customer_id], references: [id])
+  customer_id     Int
+  orders          Order[]
+}
