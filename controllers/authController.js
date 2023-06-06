@@ -17,58 +17,57 @@ exports.getUsers = async (req, res, next) => {
   }
 };
 
-exports.createEmployeeUser = async (req, res, next) => {
-  const { user_fname, user_lname, user_password, user_email, user_type } =
-    req.body;
-
-  const hashedPassword = authHandler.hashPassword(user_password);
-
-  const employeeUser = {
-    user_fname,
-    user_lname,
-    user_password: hashedPassword,
-    user_email,
-    user_type: "EMPLOYEE", // The default is CUSTOMER
-  };
+exports.logInUser = async (req, res, next) => {
+  const { user_email, user_password } = req.body;
 
   try {
+    const userData = await userModel.getUserByEmail(user_email);
+
+    const { id, user_fname, user_lname, user_email, user_type } = userData;
+
+    const unhashedPassword = authHandler.unhashPassword(
+      user_password,
+      userData.user_password
+    );
+
+    if (!unhashedPassword && !userFoundEmail) {
+      res.status(501).json({
+        error: "Invalid password and email",
+      });
+    } else if (!userFoundEmail) {
+      res.status(501).json({
+        error: "Invalid email",
+      });
+    } else if (!unhashedPassword) {
+      res.status(501).json({
+        error: "Invalid password",
+      });
+    }
+
+    const userPayload = {
+      id,
+      user_fname,
+      user_lname,
+      user_email,
+      user_type,
+    };
+
+    const loggedInUser = authHandler.sendToken(userPayload);
+    res.cookie("userDetails", loggedInUser, {
+      httpOnly: true,
+    });
   } catch (error) {
-    res.status(501).json({
-      error: "Error creating employee user",
+    res.status(500).json({
+      error: "Error logging in user",
     });
   }
 };
 
-exports.createCustomerUser = async (req, res, next) => {
-  try {
-    const { user_fname, user_lname, user_password, user_email, user_type } =
-      req.body;
-
-    const hashedPassword = authHandler.hashPassword(user_password);
-
-    const newCustomer = {
-      user_fname,
-      user_lname,
-      user_password: hashedPassword,
-      user_email,
-      user_type: "CUSTOMER",
-    };
-
-    const createdUser = await userModel.createUser(newCustomer);
-    if (createdUser) {
-      console.log(createdUser);
-    }
-    if (createdUser.length == 0) {
-      return res.status(400).json({
-        message: "Error creating user",
-      });
-    }
-    res.status(201).json(createdUser);
-  } catch (error) {
-    res.status(500).json({
-      error: "Error creating new user",
-    });
-  }
+exports.logOutUser = (req, res, next) => {
+  res.clearCookie("userDetails");
+  res.status(200).json({
+    message: "User logged out",
+  });
 };
 
 exports.deleteUserTable = async (req, res, next) => {
