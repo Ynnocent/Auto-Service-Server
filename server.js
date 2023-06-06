@@ -9,6 +9,8 @@ const PORT = process.env.DEV_PORT; // Development Port. Make sure to make change
 
 // Routes
 const authRoutes = require("./routes/authRoute");
+const customerRoutes = require("./routes/customerRoute");
+const employeeRoutes = require("./routes/employeeRoute");
 
 // Server Extra Config
 app.use(bodyParser.json());
@@ -23,6 +25,8 @@ app.use(express.json());
 
 // Server Logic
 app.use("/user", authRoutes);
+app.use("/customer", customerRoutes);
+app.use("/employee", employeeRoutes);
 
 // Server Listening in
 app.listen(PORT, ()=> {
