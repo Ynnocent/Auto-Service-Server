@@ -65,20 +65,21 @@ model User {
   user_lname    String
   user_password String
   user_email    String     @unique
-  user_type     UserType @default(CUSTOMER)
+  user_type     UserType   @default(CUSTOMER)
   date_created  DateTime   @default(now())
   employee      Employee[]
   customer      Customer[]
 
-  @@unique([id, user_type])
+  @@unique([user_type, id, user_email])
 }
 
 model Employee {
   id            Int             @id @default(autoincrement())
-  user          User            @relation(fields: [user_type, user_id], references: [user_type, id])
+  user          User            @relation(fields: [user_type, user_id, user_email], references: [user_type, id, user_email])
+  user_email    String
   user_type     UserType
   user_id       String
-  employee_type EmployeeType[]  @unique
+  employee_type EmployeeType[]  @unique @default([STORE_ADMIN]) 
   hire_date     DateTime        @default(now())
   salary        Decimal         @default(0.0)
   store         Store           @relation(fields: [store_id], references: [id])
@@ -123,8 +124,8 @@ model Order {
 }
 
 model Customer {
-  id        Int        @id @default(autoincrement())
-  user      User       @relation(fields: [user_id], references: [id])
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [user_id], references: [id])
   user_id   String
   user_type UserType
   car       Car[]

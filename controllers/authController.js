@@ -18,10 +18,10 @@ exports.getUsers = async (req, res, next) => {
 };
 
 exports.logInUser = async (req, res, next) => {
-  const { user_email, user_password } = req.body;
-
   try {
-    const userData = await userModel.getUserByEmail(user_email);
+    const { user_password } = req.body;
+
+    const userData = await userModel.getUserByEmail(req.body.user_email);
 
     const { id, user_fname, user_lname, user_email, user_type } = userData;
 
