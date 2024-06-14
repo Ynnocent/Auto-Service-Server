@@ -45,7 +45,6 @@ exports.verifyToken = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.DEV_SECRET_KEY);
 
     req.user = decoded; // Used in the next middleware
-
     next();
   } catch (error) {
     return res.status(401).json({

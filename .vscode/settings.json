@@ -10,5 +10,6 @@
             "name": "Car Service Proto DB",
             "connectString": "postgres://ynno:wa0F01QQkGgV9piUytgHcgTFF7fh7IoO@dpg-chsm7im4dad9mubljhm0-a.oregon-postgres.render.com/carserviceprotodb"
         }
-    ]
+    ],
+    "testing.openTesting": "neverOpen"
 }

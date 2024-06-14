@@ -74,7 +74,7 @@ model User {
 }
 
 model Employee {
-  id            Int             @id @default(autoincrement())
+  id            String     @id @default(uuid())
   user          User            @relation(fields: [user_type, user_id, user_email], references: [user_type, id, user_email])
   user_email    String
   user_type     UserType
@@ -83,7 +83,7 @@ model Employee {
   hire_date     DateTime        @default(now())
   salary        Decimal         @default(0.0)
   store         Store           @relation(fields: [store_id], references: [id])
-  store_id      Int
+  store_id      String
   orders        OrderEmployee[]
   order         Order[]
 
@@ -91,7 +91,7 @@ model Employee {
 }
 
 model Store {
-  id            Int        @id @default(autoincrement())
+  id            String     @id @default(uuid())
   store_name    String     @unique
   store_address String
   store_phone   String
@@ -100,31 +100,31 @@ model Store {
 }
 
 model OrderEmployee {
-  id          Int      @id @default(autoincrement())
+  id          String     @id @default(uuid())
   order       Order    @relation(fields: [order_id], references: [id])
-  order_id    Int
+  order_id    String
   employee    Employee @relation(fields: [employee_id], references: [id])
-  employee_id Int
+  employee_id String
 }
 
 model Order {
-  id             Int             @id @default(autoincrement())
+  id             String     @id @default(uuid())
   order_id       Int
   order_date     DateTime        @default(now())
   order_status   OrderStatus
   service_type   ServiceType[]   @unique
   total_amount   Decimal
   empolyees      Employee        @relation(fields: [employee_id], references: [id])
-  employee_id    Int
+  employee_id    String
   order_employee OrderEmployee[]
   car            Car             @relation(fields: [car_id], references: [id])
-  car_id         Int
+  car_id         String
   customer       Customer        @relation(fields: [customer_id], references: [id])
-  customer_id    Int
+  customer_id    String
 }
 
 model Customer {
-  id        Int      @id @default(autoincrement())
+  id        String     @id @default(uuid())
   user      User     @relation(fields: [user_id], references: [id])
   user_id   String
   user_type UserType
@@ -133,7 +133,7 @@ model Customer {
 }
 
 model Car {
-  id              Int      @id @default(autoincrement())
+  id              String     @id @default(uuid())
   car_name        String   @unique
   car_type        CarType
   car_color       String
@@ -142,6 +142,6 @@ model Car {
   car_price       Decimal
   car_damage_desc String
   customer        Customer @relation(fields: [customer_id], references: [id])
-  customer_id     Int
+  customer_id     String
   orders          Order[]
 }

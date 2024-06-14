@@ -1,22 +1,22 @@
 const customerModel = require("../Models/customerModel");
 const authHandler = require("../utils/authHandler");
 const userModel = require("../Models/userModel.js");
+const { UserType } = require("@prisma/client");
 
 exports.createCustomerUser = async (req, res, next) => {
   try {
     const { user_fname, user_lname, user_password, user_email } = req.body;
-
     const hashedPassword = authHandler.hashPassword(user_password);
-
     const newCustomer = {
       user_fname,
       user_lname,
       user_password: hashedPassword,
       user_email,
-      user_type: "CUSTOMER",
+      user_type: UserType.CUSTOMER,
     };
 
     const createdUser = await userModel.createUser(newCustomer);
+    
     if (createdUser.length == 0) {
       return res.status(400).json({
         message: "Error creating user",
@@ -32,9 +32,10 @@ exports.createCustomerUser = async (req, res, next) => {
 
 exports.fetchCarList = async (req, res, next) => {
   try {
-    const customer_id = req.user_id; // received from previous middleware
+    const customer_id = req.user.id; // received from previous middleware
+    
     const carList = await customerModel.fetchCarList(customer_id);
-
+    
     if (!carList) {
       res.status(500).json({
         error: "Error fetching car list",
@@ -63,32 +64,29 @@ exports.uploadCarData = async (req, res, next) => {
     car_damage_description,
   } = req.body;
 
-  const user_id = req.user_id; // received from the verifyCustomer middleware
+  const user_id = req.user.id; // received from the verifyCustomer middleware
 
   try {
-    const customer = await customerModel.getCustomerById(user_id);
-    if (!customer) {
-      res.send(500).json({
-        message: "Customer not found",
-      });
-    }
+    const parsedCarYear = parseInt(car_year);
+
+    const customerDetails = await customerModel.getCustomerById(user_id);
 
     const newCar = {
-      customer_id: req.user_id,
+      customer_id: customerDetails.id,
       car_name,
       car_type,
       car_color,
       car_model,
-      car_year,
+      car_year: parsedCarYear,
       car_price,
-      car_damage_description,
+      car_damage_desc: car_damage_description,
     };
 
     const car_data = await customerModel.createCarData(newCar);
 
     if (!car_data) {
       res.send(500).json({
-        error: "Error creating car",
+        message: "Error creating car",
       });
     }
 
@@ -98,7 +96,7 @@ exports.uploadCarData = async (req, res, next) => {
     });
   } catch (error) {
     res.status(500).json({
-      error: "Internal server error",
+      message: "Internal server error",
     });
   }
 };

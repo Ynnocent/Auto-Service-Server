@@ -22,7 +22,12 @@ exports.logInUser = async (req, res, next) => {
     const { user_password } = req.body;
 
     const userData = await userModel.getUserByEmail(req.body.user_email);
-
+    // console.log(userData);
+    if (!userData) {
+      return res.status(401).json({
+        error: "Invalid email",
+      });
+    }
     const { id, user_fname, user_lname, user_email, user_type } = userData;
 
     const unhashedPassword = authHandler.unhashPassword(
@@ -30,16 +35,8 @@ exports.logInUser = async (req, res, next) => {
       userData.user_password
     );
 
-    if (!unhashedPassword && !userFoundEmail) {
-      res.status(501).json({
-        error: "Invalid password and email",
-      });
-    } else if (!userFoundEmail) {
-      res.status(501).json({
-        error: "Invalid email",
-      });
-    } else if (!unhashedPassword) {
-      res.status(501).json({
+    if (!unhashedPassword) {
+      return res.status(401).json({
         error: "Invalid password",
       });
     }
@@ -53,9 +50,18 @@ exports.logInUser = async (req, res, next) => {
     };
 
     const loggedInUser = authHandler.sendToken(userPayload);
-    res.cookie("userDetails", loggedInUser, {
-      httpOnly: true,
-    });
+    // console.log(loggedInUser);
+    res
+      .cookie("userDetails", loggedInUser, {
+        path: "/",
+        httpOnly: true,
+        // samesite: "Lax",
+        // secure: true
+      })
+      .status(200)
+      .json({
+        message: "Successful Login",
+      });
   } catch (error) {
     res.status(500).json({
       error: "Error logging in user",
@@ -64,10 +70,13 @@ exports.logInUser = async (req, res, next) => {
 };
 
 exports.logOutUser = (req, res, next) => {
-  res.clearCookie("userDetails");
-  res.status(200).json({
-    message: "User logged out",
-  });
+  try {
+    res.clearCookie("userDetails").status(200).json({ message: "SIGNED OUT" });
+  } catch (error) {
+    res.status(500).json({
+      error: "Error Signing Out",
+    });
+  }
 };
 
 exports.deleteUserTable = async (req, res, next) => {

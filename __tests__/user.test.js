@@ -36,7 +36,27 @@ describe("Users controller", () => {
 
 describe("Customer Controller", () => {
   test("Create car", async () => {
-    const response = await request(testURL).post("customer/carupload").send(carData);
-    expect(response.statusCode).toBe(200)
+    const userDetails = {
+      user_email: "plucenaynno@gmail.com",
+      user_password: "1289823",
+    };
+
+    const carData = {
+      car_name: "Toyota Corolla",
+      car_type: "Sedan",
+      car_color: "White",
+      car_model: "Toyota",
+      car_year: "2020",
+      car_price: 2000,
+      car_damage_description: "TEST DESCRIPTION",
+    };
+    const login = await request(testURL)
+      .post("user/login")
+      .send(userDetails);
+
+    const response = await request(testURL)
+      .post("customer/carupload")
+      .send(carData);
+    expect(response.statusCode).toBe(200);
   });
 });

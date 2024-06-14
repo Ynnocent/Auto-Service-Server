@@ -17,6 +17,12 @@ router.get(
   authHandler.verifyCustomerUserType,
   customerController.fetchCarList
 );
+router.get(
+  "/fetchcarlist",
+  authHandler.verifyToken,
+  authHandler.verifyCustomerUserType,
+  customerController.fetchCarList
+);
 router.post("/login", authController.logInUser);
 router.post("/logout", authHandler.verifyToken, authController.logOutUser);
 

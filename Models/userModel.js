@@ -1,3 +1,5 @@
+
+
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
@@ -47,10 +49,15 @@ async function getUserByEmail(user_email) {
   }
 }
 
-async function createUser(data) {
-  const { user_fname, user_lname, user_password, user_email, user_type } = data;
-
+async function createUser({
+  user_fname,
+  user_lname,
+  user_password,
+  user_email,
+  user_type,
+}) {
   try {
+    console.log(user_fname, user_lname, user_password, user_email, user_type);
     const user = await prisma.user.create({
       data: {
         user_fname,
@@ -60,7 +67,16 @@ async function createUser(data) {
         user_type,
       },
     });
-    return user;
+
+
+    const customerDetails = await prisma.customer.create({
+      data: {
+        user_id: user.id,
+        user_type,
+      },
+    });
+
+    return user, customerDetails;
   } catch (error) {
     return error;
   }
@@ -73,15 +89,6 @@ async function clearUserDatabase() {
   } catch (error) {
     return error;
   }
-}
-
-async function getUser(id) {
-  const user = await prisma.user.findFirst({
-    where: {
-      id: id,
-    },
-  });
-  return user;
 }
 
 module.exports = {
